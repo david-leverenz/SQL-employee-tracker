@@ -21,8 +21,8 @@ Bonus<br>
 * View the total utilized budget of a department&mdash;in other words, the combined salaries of all employees in that department.<br>
 
 ## Links
-**GitHub:** <br>
-**Walkthrough Video** <br>
+**GitHub:** https://github.com/david-leverenz/SQL-employee-tracker<br>
+**Walkthrough Video:** <br>
 **Live Link:** N/A <br>
 **Screen Shot:** <br>
 
