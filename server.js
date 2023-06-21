@@ -1,3 +1,5 @@
+const mysql = require('mysql2');
+
 const db = mysql.createConnection(
     {
         host: "localhost",
@@ -7,12 +9,4 @@ const db = mysql.createConnection(
     }
 )
 
-.then
-switch(userInput.userInput){
-    case 'something':
-        queryName;
-        break;
-    case 'something else':
-        queryName;
-        break;
-}
+module.exports = db;
