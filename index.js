@@ -4,17 +4,10 @@ const inquirer = require('inquirer');
 const mysql = require('mysql2');
 const connection = require('./server.js');
 
-const { askQuestions, addEmployee } = require('./lib/input.js');
+const { askQuestions, addNewEmployee } = require('./lib/input.js');
 // const addEmployee = addEmployee('./lib/input.js');
 
-function addNewEmployee() {
-    inquirer
-        .prompt(addEmployee)
-        .then
-        ((data) => {
-            console.log(data);
-        })
-}
+
 
 function init() {
     inquirer
@@ -26,7 +19,7 @@ function init() {
             if (choice === "View All Employees") {
                 viewAllEmployees();
             } else if (choice === "Add New Employee") {
-                addNewEmployee();
+newEmp();
             } else if (choice === "Update Employee Role") {
                 console.log("run update employee role function")
             } else if (choice === "View All Roles") {
@@ -54,6 +47,43 @@ const viewAllEmployees = () => {
         if (err) throw err;
         console.table(res);
         init();
+    });
+}
+
+const newEmp = () =>{
+    let rolesList = [];
+    connection.query('select * from role', (err, data) => {
+        rolesList = data.map(role => `${role.title}`);
+        // console.log(rolesList);
+        inquirer
+        .prompt([
+            {
+                type: 'input',
+                message: "What is the employee's first name?",
+                name: 'employeeFirstName',
+            },
+            {
+                type: 'input',
+                message: "What is the employee's last name?",
+                name: 'employeeLastName',
+            },
+            {
+                type: 'list',
+                message: "What is the employee's role?",
+                choices: rolesList,
+                name: 'employeeRole',
+            },
+            {
+                type: 'list',
+                message: "Who is the employee's manager?",
+                choices: ["1","2","3"],
+                name: 'employeeManager',
+            }
+        ])
+        .then
+        ((data) => {
+            console.log(data);
+        })
     });
 }
 
