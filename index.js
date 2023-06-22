@@ -30,6 +30,8 @@ function init() {
                 viewAllDepartments();
             } else if (choice === "Add Department") {
                 addDepartment();
+            } else if (choice === "Quit") {
+                process.exit(0);
             } return
         })
 }
