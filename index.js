@@ -4,8 +4,17 @@ const inquirer = require('inquirer');
 const mysql = require('mysql2');
 const connection = require('./server.js');
 
-const askQuestions = require('./lib/input.js');
+const { askQuestions, addEmployee } = require('./lib/input.js');
+// const addEmployee = addEmployee('./lib/input.js');
 
+function addNewEmployee() {
+    inquirer
+        .prompt(addEmployee)
+        .then
+        ((data) => {
+            console.log(data);
+        })
+}
 
 function init() {
     inquirer
@@ -16,8 +25,8 @@ function init() {
             // console.log(choice);
             if (choice === "View All Employees") {
                 viewAllEmployees();
-            } else if (choice === "Add Employee") {
-                console.log("run add employee function")
+            } else if (choice === "Add New Employee") {
+                addNewEmployee();
             } else if (choice === "Update Employee Role") {
                 console.log("run update employee role function")
             } else if (choice === "View All Roles") {
@@ -43,7 +52,8 @@ const viewAllEmployees = () => {
     LEFT JOIN employee AS e2 ON e1.manager_id = e2.id`;
     connection.query(sql, (err, res) => {
         if (err) throw err;
-        console.log(res);
+        console.table(res);
         init();
-    })
-};
+    });
+}
+

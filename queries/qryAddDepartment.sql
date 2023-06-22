@@ -1,2 +1,2 @@
-INSERT INTO department (id, name)
-VALUES ("value from inquirer input departmentName or maybe addDepartment")
+INSERT INTO department (name)
+VALUES ("Department Name");
