@@ -4,7 +4,7 @@ const inquirer = require('inquirer');
 const mysql = require('mysql2');
 const connection = require('./server.js');
 
-const { askQuestions, addNewEmployee } = require('./lib/input.js');
+const askQuestions = require('./lib/input.js');
 // const addEmployee = addEmployee('./lib/input.js');
 
 
@@ -21,7 +21,7 @@ function init() {
             } else if (choice === "Add New Employee") {
                 newEmp();
             } else if (choice === "Update Employee Role") {
-                console.log("run update employee role function")
+                updateRole();
             } else if (choice === "View All Roles") {
                 console.log("run view all roles query");
             } else if (choice === "Add Role") {
@@ -42,7 +42,7 @@ const viewAllEmployees = () => {
     FROM employee AS e1
     JOIN role ON e1.role_id = role.id
     JOIN department on role.department_id = department.id
-    LEFT JOIN employee AS e2 ON e1.manager_id = e2.id`;
+    LEFT JOIN employee AS e2 ON e1.manager_id = e2.id ORDER BY e1.last_name`;
     connection.query(sql, (err, res) => {
         if (err) throw err;
         console.table(res);
@@ -51,12 +51,11 @@ const viewAllEmployees = () => {
 }
 
 const newEmp = () =>{
-    connection.query('select * from role', (err, data) => {
+    connection.query('SELECT * FROM role ORDER BY title', (err, data) => {
         const rolesList = data.map(role => ({name:role.title, value: role.id}));
-        connection.query('select distinct e1.id, e1.last_name from employee AS e1 JOIN employee AS e2 WHERE e2.manager_id = e1.id', (err, managerData) => {
+        connection.query('SELECT DISTINCT distinct e1.id, e1.last_name from employee AS e1 JOIN employee AS e2 WHERE e2.manager_id = e1.id ORDER BY e1.last_name', (err, managerData) => {
             const managerList = managerData.map(manager =>({name: manager.last_name, value: manager.id}))
          
-        // console.log(rolesList);
         inquirer
         .prompt([
             {
@@ -85,16 +84,50 @@ const newEmp = () =>{
         .then
         ((data) => {
             console.log(data)
-            connection.query("Insert into employee SET ?", {first_name: data.employeeFirstName, last_name: data.employeeLastName, role_id: data.employeeRole, manager_id: data.employeeManager},(err, data)=>{
+            connection.query("INSERT into employee SET ?", {first_name: data.employeeFirstName, last_name: data.employeeLastName, role_id: data.employeeRole, manager_id: data.employeeManager},(err, data)=>{
                 if(err) console.log(err)
                 init()
             })
-            // connection.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ("${data.employeeFirstName}", "${data.employeeLastName}", "${data.employeeRole}", "${data.employeeManager}")`,(err, data)=>{
-            //     if(err) console.log(err)
-            //     init()
-            // });
         })
     }) 
     });
 }
+
+const updateRole = () => {
+    connection.query('SELECT * FROM employee ORDER BY last_name', (err, data) => {
+        const employeeList = data.map(employee => ({name:`${employee.last_name}, ${employee.first_name}`, value: employee.id}));
+        connection.query('SELECT * FROM role ORDER BY title', (err, rolesData) => {
+            const rolesList = rolesData.map(roles => ({name:roles.title, value: roles.id}));
+      
+        inquirer
+        .prompt([
+                {
+                    type: 'list',
+                    message: "Which employee's role do you want to update?",
+                    choices: employeeList,
+                    name: 'employeeSelect',
+                },
+                {
+                    type: 'list',
+                    message: "Which role do you want to assign the selected employee?",
+                    choices: rolesList,
+                    name: 'newRole',
+                }
+            ])
+        .then
+        ((data) => {
+            console.log(data)
+            connection.query(`UPDATE employee SET role_id = ${data.newRole} WHERE id = ${data.employeeSelect}`, (err, data)=>{
+                if(err) console.log(err)
+                init()
+            })
+        })
+    }) 
+    });
+
+
+
+    
+}
+
 
