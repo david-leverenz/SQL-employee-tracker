@@ -3,9 +3,8 @@ const fs = require('fs');
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
 const connection = require('./server.js');
-
 const askQuestions = require('./lib/input.js');
-// const addEmployee = addEmployee('./lib/input.js');
+
 
 
 
@@ -30,9 +29,11 @@ function init() {
                 viewAllDepartments();
             } else if (choice === "Add Department") {
                 addDepartment();
+            } else if (choice === "Update Employee Manager") {
+                updateEmployeeManager();
             } else if (choice === "Quit") {
                 process.exit(0);
-            } return
+            }  return
         })
 }
 
@@ -40,7 +41,7 @@ init()
 
 // View All Employees
 const viewAllEmployees = () => {
-    let sql = `SELECT e1.id AS "Employee ID", e1.first_name AS "Employee First", e1.last_name AS "Employee Last", role.title AS "Employee Title", department.name AS "Department", role.salary AS "Employee Salary", CONCAT_WS(" ", e2.first_name, e2.last_name) AS "Manager Name" 
+    let sql = `SELECT e1.id AS "ID", e1.first_name AS "First", e1.last_name AS "Last", role.title AS "Title", department.name AS "Department", role.salary AS "Salary", CONCAT_WS(" ", e2.first_name, e2.last_name) AS "Manager" 
     FROM employee AS e1
     JOIN role ON e1.role_id = role.id
     JOIN department on role.department_id = department.id
@@ -48,6 +49,7 @@ const viewAllEmployees = () => {
     connection.query(sql, (err, res) => {
         if (err) throw err;
         console.table(res);
+
         init();
     });
 }
@@ -126,10 +128,6 @@ const updateRole = () => {
                 })
         })
     });
-
-
-
-
 }
 
 const viewAllRoles = () => {
@@ -205,3 +203,43 @@ const addDepartment = () => {
             })
     }
 
+const updateEmployeeManager = () => {
+    connection.query('SELECT * FROM employee ORDER BY last_name', (err, data) => {
+        const employeeList = data.map(employee => ({ name: `${employee.last_name}, ${employee.first_name}`, value: employee.id }));
+        connection.query('SELECT DISTINCT distinct e1.id, e1.last_name from employee AS e1 JOIN employee AS e2 WHERE e2.manager_id = e1.id ORDER BY e1.last_name', (err, managerData) => {
+            const managerList = managerData.map(manager => ({ name: manager.last_name, value: manager.id }));
+
+            inquirer
+                .prompt([
+                    {
+                        type: 'list',
+                        message: "Which employee's manager do you want to update?",
+                        choices: employeeList,
+                        name: 'employeeSelect',
+                    },
+                    {
+                        type: 'list',
+                        message: "Who should be the new manager?",
+                        choices: managerList,
+                        name: 'newManager',
+                    }
+                ])
+                .then
+                ((data) => {
+                    console.log(data)
+                    connection.query(`UPDATE employee SET manager_id = ${data.newManager} WHERE id = ${data.employeeSelect}`, (err, data) => {
+                        if (err) console.log(err)
+                        init()
+                    })
+                })
+        })
+    });
+}
+
+// * View employees by manager.
+
+// * View employees by department.
+
+// * Delete departments, roles, and employees.
+
+// * View the total utilized budget of a department&mdash;in other words, the combined salaries of all employees in that department.
