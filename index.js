@@ -27,7 +27,7 @@ function init() {
             } else if (choice === "Add Role") {
                 addRole();
             } else if (choice === "View All Departments") {
-                console.log("run query view all departments");
+                viewAllDepartments();
             } else if (choice === "Add Department") {
                 console.log("run add department function");
             } return
@@ -50,84 +50,84 @@ const viewAllEmployees = () => {
     });
 }
 
-const newEmp = () =>{
+const newEmp = () => {
     connection.query('SELECT * FROM role ORDER BY title', (err, data) => {
-        const rolesList = data.map(role => ({name:role.title, value: role.id}));
+        const rolesList = data.map(role => ({ name: role.title, value: role.id }));
         connection.query('SELECT DISTINCT distinct e1.id, e1.last_name from employee AS e1 JOIN employee AS e2 WHERE e2.manager_id = e1.id ORDER BY e1.last_name', (err, managerData) => {
-            const managerList = managerData.map(manager =>({name: manager.last_name, value: manager.id}))
-         
-        inquirer
-        .prompt([
-            {
-                type: 'input',
-                message: "What is the employee's first name?",
-                name: 'employeeFirstName',
-            },
-            {
-                type: 'input',
-                message: "What is the employee's last name?",
-                name: 'employeeLastName',
-            },
-            {
-                type: 'list',
-                message: "What is the employee's role?",
-                choices: rolesList,
-                name: 'employeeRole',
-            },
-            {
-                type: 'list',
-                message: "Who is the employee's manager?",
-                choices: managerList,
-                name: 'employeeManager',
-            }
-        ])
-        .then
-        ((data) => {
-            console.log(data)
-            connection.query("INSERT into employee SET ?", {first_name: data.employeeFirstName, last_name: data.employeeLastName, role_id: data.employeeRole, manager_id: data.employeeManager},(err, data)=>{
-                if(err) console.log(err)
-                init()
-            })
+            const managerList = managerData.map(manager => ({ name: manager.last_name, value: manager.id }))
+
+            inquirer
+                .prompt([
+                    {
+                        type: 'input',
+                        message: "What is the employee's first name?",
+                        name: 'employeeFirstName',
+                    },
+                    {
+                        type: 'input',
+                        message: "What is the employee's last name?",
+                        name: 'employeeLastName',
+                    },
+                    {
+                        type: 'list',
+                        message: "What is the employee's role?",
+                        choices: rolesList,
+                        name: 'employeeRole',
+                    },
+                    {
+                        type: 'list',
+                        message: "Who is the employee's manager?",
+                        choices: managerList,
+                        name: 'employeeManager',
+                    }
+                ])
+                .then
+                ((data) => {
+                    console.log(data)
+                    connection.query("INSERT into employee SET ?", { first_name: data.employeeFirstName, last_name: data.employeeLastName, role_id: data.employeeRole, manager_id: data.employeeManager }, (err, data) => {
+                        if (err) console.log(err)
+                        init()
+                    })
+                })
         })
-    }) 
     });
 }
 
 const updateRole = () => {
     connection.query('SELECT * FROM employee ORDER BY last_name', (err, data) => {
-        const employeeList = data.map(employee => ({name:`${employee.last_name}, ${employee.first_name}`, value: employee.id}));
+        const employeeList = data.map(employee => ({ name: `${employee.last_name}, ${employee.first_name}`, value: employee.id }));
         connection.query('SELECT * FROM role ORDER BY title', (err, rolesData) => {
-            const rolesList = rolesData.map(roles => ({name:roles.title, value: roles.id}));
-      
-        inquirer
-        .prompt([
-                {
-                    type: 'list',
-                    message: "Which employee's role do you want to update?",
-                    choices: employeeList,
-                    name: 'employeeSelect',
-                },
-                {
-                    type: 'list',
-                    message: "Which role do you want to assign the selected employee?",
-                    choices: rolesList,
-                    name: 'newRole',
-                }
-            ])
-        .then
-        ((data) => {
-            console.log(data)
-            connection.query(`UPDATE employee SET role_id = ${data.newRole} WHERE id = ${data.employeeSelect}`, (err, data)=>{
-                if(err) console.log(err)
-                init()
-            })
+            const rolesList = rolesData.map(roles => ({ name: roles.title, value: roles.id }));
+
+            inquirer
+                .prompt([
+                    {
+                        type: 'list',
+                        message: "Which employee's role do you want to update?",
+                        choices: employeeList,
+                        name: 'employeeSelect',
+                    },
+                    {
+                        type: 'list',
+                        message: "Which role do you want to assign the selected employee?",
+                        choices: rolesList,
+                        name: 'newRole',
+                    }
+                ])
+                .then
+                ((data) => {
+                    console.log(data)
+                    connection.query(`UPDATE employee SET role_id = ${data.newRole} WHERE id = ${data.employeeSelect}`, (err, data) => {
+                        if (err) console.log(err)
+                        init()
+                    })
+                })
         })
-    }) 
     });
 
 
 
-    
+
 }
 
 const viewAllRoles = () => {
@@ -142,10 +142,10 @@ const viewAllRoles = () => {
 
 const addRole = () => {
     connection.query('SELECT * FROM department ORDER BY name', (err, data) => {
-        const deptList = data.map(dept => ({name:dept.name, value: dept.id}));
-                
+        const deptList = data.map(dept => ({ name: dept.name, value: dept.id }));
+
         inquirer
-        .prompt([
+            .prompt([
                 {
                     type: 'input',
                     message: 'What is the name of the role?',
@@ -163,13 +163,47 @@ const addRole = () => {
                     name: 'roleDepartment',
                 }
             ])
-        .then
-        ((data) => {
-            console.log(data)
-            connection.query("INSERT INTO role SET ?", {department_id: data.roleDepartment, title: data.roleName, salary: data.roleSalary},(err, data)=>{
-                if(err) console.log(err)
-                init()
+            .then
+            ((data) => {
+                console.log(data)
+                connection.query("INSERT INTO role SET ?", { department_id: data.roleDepartment, title: data.roleName, salary: data.roleSalary }, (err, data) => {
+                    if (err) console.log(err)
+                    init()
+                })
             })
-        })
     })
-    };
+};
+
+const viewAllDepartments = () => {
+    let sql = `SELECT DISTINCT name AS "Current Departments" FROM department ORDER BY name`;
+    connection.query(sql, (err, res) => {
+        if (err) throw err;
+        console.table(res);
+        init();
+    });
+
+}
+
+const addDepartment = () => {
+    connection.query('SELECT * FROM department ORDER BY name', (err, data) => {
+        const deptList = data.map(dept => ({ name: dept.name, value: dept.id }));
+
+        inquirer
+            .prompt([
+                {
+                    type: 'input',
+                    message: 'What is the name of the department?',
+                    choices: ['View All Employees', 'Add Employee', 'Update Employee Role', 'View All Roles', 'Add Role', 'View All Departments', 'Add Department', 'Quit'],
+                    name: 'departmentName',
+                },
+            ])
+            .then
+            ((data) => {
+                console.log(data)
+                connection.query("INSERT INTO role SET ?", { department_id: data.roleDepartment, title: data.roleName, salary: data.roleSalary }, (err, data) => {
+                    if (err) console.log(err)
+                    init()
+                })
+            })
+    })
+};
