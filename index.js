@@ -23,7 +23,7 @@ function init() {
             } else if (choice === "Update Employee Role") {
                 updateRole();
             } else if (choice === "View All Roles") {
-                console.log("run view all roles query");
+                viewAllRoles();
             } else if (choice === "Add Role") {
                 console.log("run add role function");
             } else if (choice === "View All Departments") {
@@ -130,4 +130,12 @@ const updateRole = () => {
     
 }
 
+const viewAllRoles = () => {
+    let sql = `SELECT DISTINCT title AS "Current Roles" FROM role ORDER BY title`;
+    connection.query(sql, (err, res) => {
+        if (err) throw err;
+        console.table(res);
+        init();
+    });
 
+}
