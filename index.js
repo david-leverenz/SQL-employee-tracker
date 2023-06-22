@@ -19,7 +19,7 @@ function init() {
             if (choice === "View All Employees") {
                 viewAllEmployees();
             } else if (choice === "Add New Employee") {
-newEmp();
+                newEmp();
             } else if (choice === "Update Employee Role") {
                 console.log("run update employee role function")
             } else if (choice === "View All Roles") {
@@ -51,9 +51,11 @@ const viewAllEmployees = () => {
 }
 
 const newEmp = () =>{
-    let rolesList = [];
     connection.query('select * from role', (err, data) => {
-        rolesList = data.map(role => `${role.title}`);
+        const rolesList = data.map(role => ({name:role.title, value: role.id}));
+        connection.query('select distinct e1.id, e1.last_name from employee AS e1 JOIN employee AS e2 WHERE e2.manager_id = e1.id', (err, managerData) => {
+            const managerList = managerData.map(manager =>({name: manager.last_name, value: manager.id}))
+         
         // console.log(rolesList);
         inquirer
         .prompt([
@@ -76,14 +78,23 @@ const newEmp = () =>{
             {
                 type: 'list',
                 message: "Who is the employee's manager?",
-                choices: ["1","2","3"],
+                choices: managerList,
                 name: 'employeeManager',
             }
         ])
         .then
         ((data) => {
-            console.log(data);
+            console.log(data)
+            connection.query("Insert into employee SET ?", {first_name: data.employeeFirstName, last_name: data.employeeLastName, role_id: data.employeeRole, manager_id: data.employeeManager},(err, data)=>{
+                if(err) console.log(err)
+                init()
+            })
+            // connection.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ("${data.employeeFirstName}", "${data.employeeLastName}", "${data.employeeRole}", "${data.employeeManager}")`,(err, data)=>{
+            //     if(err) console.log(err)
+            //     init()
+            // });
         })
+    }) 
     });
 }
 
