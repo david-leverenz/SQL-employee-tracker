@@ -25,7 +25,7 @@ function init() {
             } else if (choice === "View All Roles") {
                 viewAllRoles();
             } else if (choice === "Add Role") {
-                console.log("run add role function");
+                addRole();
             } else if (choice === "View All Departments") {
                 console.log("run query view all departments");
             } else if (choice === "Add Department") {
@@ -139,3 +139,37 @@ const viewAllRoles = () => {
     });
 
 }
+
+const addRole = () => {
+    connection.query('SELECT * FROM department ORDER BY name', (err, data) => {
+        const deptList = data.map(dept => ({name:dept.name, value: dept.id}));
+                
+        inquirer
+        .prompt([
+                {
+                    type: 'input',
+                    message: 'What is the name of the role?',
+                    name: 'roleName',
+                },
+                {
+                    type: 'input',
+                    message: 'What is the salary of the role?',
+                    name: 'roleSalary',
+                },
+                {
+                    type: 'list',
+                    message: 'What department for the role belong to?',
+                    choices: deptList,
+                    name: 'roleDepartment',
+                }
+            ])
+        .then
+        ((data) => {
+            console.log(data)
+            connection.query("INSERT INTO role SET ?", {department_id: data.roleDepartment, title: data.roleName, salary: data.roleSalary},(err, data)=>{
+                if(err) console.log(err)
+                init()
+            })
+        })
+    })
+    };
