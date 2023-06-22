@@ -29,7 +29,7 @@ function init() {
             } else if (choice === "View All Departments") {
                 viewAllDepartments();
             } else if (choice === "Add Department") {
-                console.log("run add department function");
+                addDepartment();
             } return
         })
 }
@@ -185,25 +185,21 @@ const viewAllDepartments = () => {
 }
 
 const addDepartment = () => {
-    connection.query('SELECT * FROM department ORDER BY name', (err, data) => {
-        const deptList = data.map(dept => ({ name: dept.name, value: dept.id }));
-
-        inquirer
+            inquirer
             .prompt([
                 {
                     type: 'input',
                     message: 'What is the name of the department?',
-                    choices: ['View All Employees', 'Add Employee', 'Update Employee Role', 'View All Roles', 'Add Role', 'View All Departments', 'Add Department', 'Quit'],
                     name: 'departmentName',
                 },
             ])
             .then
             ((data) => {
                 console.log(data)
-                connection.query("INSERT INTO role SET ?", { department_id: data.roleDepartment, title: data.roleName, salary: data.roleSalary }, (err, data) => {
+                connection.query("INSERT INTO department SET ?", { name: data.departmentName }, (err, data) => {
                     if (err) console.log(err)
                     init()
                 })
             })
-    })
-};
+    }
+
