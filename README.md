@@ -43,5 +43,5 @@ Version 1.0 Initial Release
 ## License
 This project is licensed under the MIT license.
 ## Acknowledgments
-Special thanks to Poornima for helping me get the first thing done.  Very special thanks to my tutor Erik Hirsch for helpoing me get one of the more complicated inserts done.
+Special thanks to Poornima for helping me get the first thing done.  Very special thanks to my tutor Erik Hirsch for helping me get one of the more complicated inserts done.
 
