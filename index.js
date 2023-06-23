@@ -261,8 +261,8 @@ const updateEmployeeManager = () => {
 }
 
 const viewEmployeesByManager = () => {
-    connection.query('SELECT DISTINCT distinct e1.id, e1.last_name from employee AS e1 JOIN employee AS e2 WHERE e2.manager_id = e1.id ORDER BY e1.last_name', (err, managerData) => {
-        const managerList = managerData.map(manager => ({ name: manager.last_name, value: manager.id }))
+    connection.query('SELECT DISTINCT distinct e1.id, e1.last_name, e1.first_name from employee AS e1 JOIN employee AS e2 WHERE e2.manager_id = e1.id ORDER BY e1.last_name', (err, managerData) => {
+        const managerList = managerData.map(manager => ({ name: `${manager.last_name}, ${manager.first_name}`, value: manager.id }))
 
         inquirer
             .prompt([
