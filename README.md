@@ -1,5 +1,5 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-# SQL-employee-tracker
+# SQL Employee Tracker
 A MySQL application that allows the user to display employee data in a variety of ways.
 
 ## Description
@@ -13,18 +13,19 @@ When you choose to add a role you are prompted to enter the name, salary, and de
 When you choose to add an employee you are prompted to enter the employee’s first name, last name, role, and manager, and that employee is added to the database.<br>
 When you choose to update an employee role you are prompted to select an employee to update and their new role and this information is updated in the database.<br>
 
-Bonus<br>
-* Update employee managers.<br>
-* View employees by manager.<br>
-* View employees by department.<br>
-* Delete departments, roles, and employees.<br>
-* View the total utilized budget of a department&mdash;in other words, the combined salaries of all employees in that department.<br>
+*Bonus*<br>
+This app also has pdate employee managers.<br>
+This app also has view employees by manager.<br>
+This app also has view employees by department.<br>
+This app also has delete employees.  I felt it dangerous to allow users the functionality to delete entire departments or roles.<br>
+This app also has total utilized budget of a department.<br>
 
 ## Links
 **GitHub:** https://github.com/david-leverenz/SQL-employee-tracker<br>
-**Walkthrough Video:** <br>
+**Walkthrough Video:** https://drive.google.com/file/d/1pHG27Jzjmt8df1NyP2TKilDdDggKbEcr/view<br>
 **Live Link:** N/A <br>
 **Screen Shot:** <br>
+![image](https://github.com/david-leverenz/SQL-employee-tracker/assets/131185593/af58bb16-1b5c-405c-ba19-64c1474ca5b9)
 
 
 ## Getting Started
@@ -42,5 +43,5 @@ Version 1.0 Initial Release
 ## License
 This project is licensed under the MIT license.
 ## Acknowledgments
-Special thanks to Poornima, Sam and Dom for their assistance in trying to solve a refresh problem!  Eventually it was Suraj Nair who figured out what I was doing incorrectly.
+Special thanks to Poornima for helping me get the first thing done.  Very special thanks to my tutor Erik Hirsch for helpoing me get one of the more complicated inserts done.
 
