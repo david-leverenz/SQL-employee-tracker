@@ -5,8 +5,9 @@ const mysql = require('mysql2');
 const connection = require('./server.js');
 const askQuestions = require('./lib/input.js');
 
+// SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));
 
-
+// SET sql_mode = 'ONLY_FULL_GROUP_BY';
 
 function init() {
     inquirer
@@ -31,9 +32,11 @@ function init() {
                 addDepartment();
             } else if (choice === "Update Employee Manager") {
                 updateEmployeeManager();
+            } else if (choice === "View Employees By Manager") {
+                viewEmployeesByManager();
             } else if (choice === "Quit") {
                 process.exit(0);
-            }  return
+            } return
         })
 }
 
@@ -185,23 +188,23 @@ const viewAllDepartments = () => {
 }
 
 const addDepartment = () => {
-            inquirer
-            .prompt([
-                {
-                    type: 'input',
-                    message: 'What is the name of the department?',
-                    name: 'departmentName',
-                },
-            ])
-            .then
-            ((data) => {
-                console.log(data)
-                connection.query("INSERT INTO department SET ?", { name: data.departmentName }, (err, data) => {
-                    if (err) console.log(err)
-                    init()
-                })
+    inquirer
+        .prompt([
+            {
+                type: 'input',
+                message: 'What is the name of the department?',
+                name: 'departmentName',
+            },
+        ])
+        .then
+        ((data) => {
+            console.log(data)
+            connection.query("INSERT INTO department SET ?", { name: data.departmentName }, (err, data) => {
+                if (err) console.log(err)
+                init()
             })
-    }
+        })
+}
 
 const updateEmployeeManager = () => {
     connection.query('SELECT * FROM employee ORDER BY last_name', (err, data) => {
@@ -236,7 +239,32 @@ const updateEmployeeManager = () => {
     });
 }
 
-// * View employees by manager.
+const viewEmployeesByManager = () => {
+    connection.query('SELECT DISTINCT distinct e1.id, e1.last_name from employee AS e1 JOIN employee AS e2 WHERE e2.manager_id = e1.id ORDER BY e1.last_name', (err, managerData) => {
+        const managerList = managerData.map(manager => ({ name: manager.last_name, value: manager.id }))
+
+        inquirer
+            .prompt([
+                {
+                    type: 'list',
+                    message: "Select a manager name below to view their employees.",
+                    choices: managerList,
+                    name: 'employeeManager',
+                }
+            ])
+            .then
+            ((data) => {
+                    connection.query(`SELECT last_name AS "Employee Last" FROM employee WHERE manager_id = ${data.employeeManager} ORDER BY last_name`, (err, data) => {
+                    if (err) console.log(err);
+                    console.table(data)
+                    init()
+                })
+            })
+    })
+}
+
+
+
 
 // * View employees by department.
 
