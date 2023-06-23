@@ -5,17 +5,37 @@ const mysql = require('mysql2');
 const connection = require('./server.js');
 const askQuestions = require('./lib/input.js');
 
-// SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));
+// This introduces the program and launches the init() file
+connection.connect((error) => {
+    if (error) throw error;
+    console.log(``);
+    console.log("        o8%8888,    ")
+    console.log("      o88%8888888.  ")
+    console.log("     8'-    -:8888b   ")
+    console.log("    8'         8888  ")
+    console.log("   d8.-=. ,==-.:888b  ")
+    console.log("   >8 `~` :`~' d8888   EMPLOYEE TRACKER")
+    console.log("   88         ,88888   Created By: David Leverenz")
+    console.log("   88b. `-~  ':88888  ")
+    console.log("   888b ~==~ .:88888 ")
+    console.log("   88888o--:':::8888      ")
+    console.log("   `88888| :::' 8888b  ")
+    console.log("   8888^^'       8888b  ")
+    console.log("  d888           ,%888b.   ")
+    console.log(" d88%            %%%8--'-.  ")
+    console.log("/88:.__ ,       _%-' ---  -  ")
+    console.log("    '''::===..-'   =  --.")
+    console.log("")
+init()
+});
 
-// SET sql_mode = 'ONLY_FULL_GROUP_BY';
-
+// This is my init() function that controls the application.  I know that most people used the "switch" function, I used a big if statement because I couldn't get switch to work and I needed to started coding.  Essentially, if what a user selected from the prompted input in input.js matches a clause in the if statement, I run a function to do what needs to be done.
 function init() {
     inquirer
         .prompt(askQuestions)
         .then
         ((data) => {
             let choice = data.queryName;
-            // console.log(choice);
             if (choice === "View All Employees") {
                 viewAllEmployees();
             } else if (choice === "Add New Employee") {
@@ -38,15 +58,16 @@ function init() {
                 viewEmployeesByDepartment();
             } else if (choice === "Remove Employee") {
                 deleteEmployee();
+            } else if (choice === "Budgets By Department") {
+                console.log('\x1b[33m This is not functional due to budget constraints!\x1b[0m')
+                init();
             } else if (choice === "Quit") {
                 process.exit(0);
             } return
         })
 }
 
-init()
-
-// View All Employees
+// These are the functions that are called by the above.  If I need to get user input I use inquirer to gather data.  Then I use either an INSERT, SELECT, UPDATE, DELETE, etc. query to make it happen.  I had planned to modularize the entire application but couldn't due to time constraints.  Each function follows roughly the same pattern.
 const viewAllEmployees = () => {
     let sql = `SELECT e1.id AS "ID", e1.first_name AS "First", e1.last_name AS "Last", role.title AS "Title", department.name AS "Department", role.salary AS "Salary", CONCAT_WS(" ", e2.first_name, e2.last_name) AS "Manager" 
     FROM employee AS e1
@@ -61,11 +82,12 @@ const viewAllEmployees = () => {
     });
 }
 
+// This requirement was tricky because I needed to run two queries and keep their variables available for later use.  I wouldn't recommend nesting queries because I spent a lot of time trying to figure out where a closing parenthesis should go.  Unfortunately my design dictated nesting so I made it work.
 const newEmp = () => {
     connection.query('SELECT * FROM role ORDER BY title', (err, data) => {
         const rolesList = data.map(role => ({ name: role.title, value: role.id }));
-        connection.query('SELECT DISTINCT distinct e1.id, e1.last_name from employee AS e1 JOIN employee AS e2 WHERE e2.manager_id = e1.id ORDER BY e1.last_name', (err, managerData) => {
-            const managerList = managerData.map(manager => ({ name: manager.last_name, value: manager.id }))
+        connection.query('SELECT e1.id, e1.last_name, e1.first_name from employee AS e1 ORDER BY e1.last_name', (err, managerData) => {
+            const managerList = managerData.map(manager => ({ name: `${manager.last_name}, ${manager.first_name}`, value: manager.id }));
 
             inquirer
                 .prompt([
@@ -94,7 +116,6 @@ const newEmp = () => {
                 ])
                 .then
                 ((data) => {
-                    console.log(data)
                     connection.query("INSERT into employee SET ?", { first_name: data.employeeFirstName, last_name: data.employeeLastName, role_id: data.employeeRole, manager_id: data.employeeManager }, (err, data) => {
                         if (err) console.log(err)
                         init()
@@ -104,6 +125,7 @@ const newEmp = () => {
     });
 }
 
+// Update query used in this one.
 const updateRole = () => {
     connection.query('SELECT * FROM employee ORDER BY last_name', (err, data) => {
         const employeeList = data.map(employee => ({ name: `${employee.last_name}, ${employee.first_name}`, value: employee.id }));
@@ -127,7 +149,6 @@ const updateRole = () => {
                 ])
                 .then
                 ((data) => {
-                    console.log(data)
                     connection.query(`UPDATE employee SET role_id = ${data.newRole} WHERE id = ${data.employeeSelect}`, (err, data) => {
                         if (err) console.log(err)
                         init()
@@ -172,7 +193,6 @@ const addRole = () => {
             ])
             .then
             ((data) => {
-                console.log(data)
                 connection.query("INSERT INTO role SET ?", { department_id: data.roleDepartment, title: data.roleName, salary: data.roleSalary }, (err, data) => {
                     if (err) console.log(err)
                     init()
@@ -202,7 +222,6 @@ const addDepartment = () => {
         ])
         .then
         ((data) => {
-            console.log(data)
             connection.query("INSERT INTO department SET ?", { name: data.departmentName }, (err, data) => {
                 if (err) console.log(err)
                 init()
@@ -211,11 +230,10 @@ const addDepartment = () => {
 }
 
 const updateEmployeeManager = () => {
-    connection.query('SELECT * FROM employee ORDER BY last_name', (err, data) => {
-        const employeeList = data.map(employee => ({ name: `${employee.last_name}, ${employee.first_name}`, value: employee.id }));
-        connection.query('SELECT DISTINCT distinct e1.id, e1.last_name from employee AS e1 JOIN employee AS e2 WHERE e2.manager_id = e1.id ORDER BY e1.last_name', (err, managerData) => {
-            const managerList = managerData.map(manager => ({ name: manager.last_name, value: manager.id }));
-
+            connection.query('SELECT * FROM employee ORDER BY last_name', (err, data) => {
+                const employeeList = data.map(employee => ({ name: `${employee.last_name}, ${employee.first_name}`, value: employee.id }));
+                connection.query('SELECT e1.id, e1.last_name, e1.first_name from employee AS e1 ORDER BY e1.last_name', (err, managerData) => {
+                    const managerList = managerData.map(manager => ({ name: `${manager.last_name}, ${manager.first_name}`, value: manager.id }));
             inquirer
                 .prompt([
                     {
@@ -233,7 +251,6 @@ const updateEmployeeManager = () => {
                 ])
                 .then
                 ((data) => {
-                    console.log(data)
                     connection.query(`UPDATE employee SET manager_id = ${data.newManager} WHERE id = ${data.employeeSelect}`, (err, data) => {
                         if (err) console.log(err)
                         init()
@@ -313,6 +330,8 @@ const deleteEmployee = () => {
                 })
             })
     })
-    };
+};
 
-// * View the total utilized budget of a department&mdash;in other words, the combined salaries of all employees in that department.
+// const departmentBudget = () => {
+
+// }
