@@ -34,6 +34,8 @@ function init() {
                 updateEmployeeManager();
             } else if (choice === "View Employees By Manager") {
                 viewEmployeesByManager();
+            } else if (choice === "View Employees By Department") {
+                viewEmployeesByDepartment();
             } else if (choice === "Quit") {
                 process.exit(0);
             } return
@@ -263,10 +265,30 @@ const viewEmployeesByManager = () => {
     })
 }
 
+const viewEmployeesByDepartment = () => {
+    connection.query('SELECT * FROM department', (err, deptData) => {
+        const deptList = deptData.map(dept => ({ name: dept.name, value: dept.id }))
 
+        inquirer
+            .prompt([
+                {
+                    type: 'list',
+                    message: "Select a department name below to view its employees.",
+                    choices: deptList,
+                    name: 'deptName',
+                }
+            ])
+            .then
+            ((data) => {
+                    connection.query(`SELECT last_name AS "Last Name" FROM employee JOIN role ON role_id = role.id WHERE department_id = ${data.deptName}`, (err, data) => {
+                    if (err) console.log(err);
+                    console.table(data)
+                    init()
+                })
+            })
+    })
 
-
-// * View employees by department.
+}
 
 // * Delete departments, roles, and employees.
 
