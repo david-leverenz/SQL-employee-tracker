@@ -26,7 +26,7 @@ connection.connect((error) => {
     console.log("/88:.__ ,       _%-' ---  -  ")
     console.log("    '''::===..-'   =  --.")
     console.log("")
-init()
+    init()
 });
 
 // This is my init() function that controls the application.  I know that most people used the "switch" function, I used a big if statement because I couldn't get switch to work and I needed to started coding.  Essentially, if what a user selected from the prompted input in input.js matches a clause in the if statement, I run a function to do what needs to be done.
@@ -59,8 +59,7 @@ function init() {
             } else if (choice === "Remove Employee") {
                 deleteEmployee();
             } else if (choice === "Budgets By Department") {
-                console.log('\x1b[33m This is not functional due to budget constraints!\x1b[0m')
-                init();
+                departmentBudget();
             } else if (choice === "Quit") {
                 process.exit(0);
             } return
@@ -230,10 +229,10 @@ const addDepartment = () => {
 }
 
 const updateEmployeeManager = () => {
-            connection.query('SELECT * FROM employee ORDER BY last_name', (err, data) => {
-                const employeeList = data.map(employee => ({ name: `${employee.last_name}, ${employee.first_name}`, value: employee.id }));
-                connection.query('SELECT e1.id, e1.last_name, e1.first_name from employee AS e1 ORDER BY e1.last_name', (err, managerData) => {
-                    const managerList = managerData.map(manager => ({ name: `${manager.last_name}, ${manager.first_name}`, value: manager.id }));
+    connection.query('SELECT * FROM employee ORDER BY last_name', (err, data) => {
+        const employeeList = data.map(employee => ({ name: `${employee.last_name}, ${employee.first_name}`, value: employee.id }));
+        connection.query('SELECT e1.id, e1.last_name, e1.first_name from employee AS e1 ORDER BY e1.last_name', (err, managerData) => {
+            const managerList = managerData.map(manager => ({ name: `${manager.last_name}, ${manager.first_name}`, value: manager.id }));
             inquirer
                 .prompt([
                     {
@@ -332,6 +331,11 @@ const deleteEmployee = () => {
     })
 };
 
-// const departmentBudget = () => {
-
-// }
+const departmentBudget = () => {
+    let sql = `SELECT department.id, department.name, sum(role.salary) AS total_budget FROM employee LEFT JOIN role ON employee.role_id = role.id LEFT JOIN department ON role.department_id = department.id GROUP BY department.id, department.name;`
+    connection.query(sql, (err, res) => {
+        if (err) throw err;
+        console.table(res);
+        init();
+    });
+}

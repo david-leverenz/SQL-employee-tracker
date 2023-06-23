@@ -30,3 +30,5 @@ create table employee (
     REFERENCES role(id),
     manager_id INT
 );
+
+select department.id, department.name, sum(role.salary) AS total_budget FROM employee left join role on employee.role_id = role.id left join department on role.department_id = department.id group by department.id, department.name;
