@@ -36,6 +36,8 @@ function init() {
                 viewEmployeesByManager();
             } else if (choice === "View Employees By Department") {
                 viewEmployeesByDepartment();
+            } else if (choice === "Remove Employee") {
+                deleteEmployee();
             } else if (choice === "Quit") {
                 process.exit(0);
             } return
@@ -256,7 +258,7 @@ const viewEmployeesByManager = () => {
             ])
             .then
             ((data) => {
-                    connection.query(`SELECT last_name AS "Employee Last" FROM employee WHERE manager_id = ${data.employeeManager} ORDER BY last_name`, (err, data) => {
+                connection.query(`SELECT last_name AS "Employee Last" FROM employee WHERE manager_id = ${data.employeeManager} ORDER BY last_name`, (err, data) => {
                     if (err) console.log(err);
                     console.table(data)
                     init()
@@ -280,7 +282,7 @@ const viewEmployeesByDepartment = () => {
             ])
             .then
             ((data) => {
-                    connection.query(`SELECT last_name AS "Last Name" FROM employee JOIN role ON role_id = role.id WHERE department_id = ${data.deptName}`, (err, data) => {
+                connection.query(`SELECT last_name AS "Last Name" FROM employee JOIN role ON role_id = role.id WHERE department_id = ${data.deptName}`, (err, data) => {
                     if (err) console.log(err);
                     console.table(data)
                     init()
@@ -290,6 +292,27 @@ const viewEmployeesByDepartment = () => {
 
 }
 
-// * Delete departments, roles, and employees.
+const deleteEmployee = () => {
+    connection.query('SELECT * FROM employee ORDER BY last_name', (err, data) => {
+        const employeeList = data.map(employee => ({ name: `${employee.last_name}, ${employee.first_name}`, value: employee.id }));
+        inquirer
+            .prompt([
+                {
+                    type: 'list',
+                    message: "Which employee do you want to remove?",
+                    choices: employeeList,
+                    name: 'employeeSelect',
+                },
+            ])
+            .then
+            ((data) => {
+                connection.query(`DELETE FROM  employee WHERE id = ${data.employeeSelect}`, (err, data) => {
+                    if (err) console.log(err);
+                    console.log("Removed");
+                    init()
+                })
+            })
+    })
+    };
 
 // * View the total utilized budget of a department&mdash;in other words, the combined salaries of all employees in that department.
